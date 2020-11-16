@@ -23,6 +23,7 @@ export class UserService {
         newUser.email = user.email;
         newUser.username = user.username;
         newUser.password = hash;
+        newUser.role = user.role;
         return from(this.userRepository.save(newUser)).pipe(
           map((user: User) => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -36,8 +37,10 @@ export class UserService {
   }
 
   findOne(id: number): Observable<User> {
-    return from(this.userRepository.findOne(id)).pipe(
+    console.log(id, 'id');
+    return from(this.userRepository.findOne({ id })).pipe(
       map((user: User) => {
+        console.log(user);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...result } = user;
         return result;
@@ -47,9 +50,12 @@ export class UserService {
   }
 
   findAll(): Observable<User[]> {
+    console.log('hello');
     return from(this.userRepository.find()).pipe(
       map((users: User[]) => {
-        users.forEach((user) => delete user.password);
+        users.forEach(function (v) {
+          delete v.password;
+        });
         return users;
       }),
     );
@@ -97,5 +103,9 @@ export class UserService {
 
   findByMail(email: string) {
     return from(this.userRepository.findOne({ email }));
+  }
+
+  updateRole(id: number, user: User): Observable<any> {
+    return from(this.userRepository.update(id, user));
   }
 }
