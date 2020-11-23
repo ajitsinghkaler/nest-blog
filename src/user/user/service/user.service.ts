@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { from, Observable, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, switchMapTo } from 'rxjs/operators';
 import { AuthService } from 'src/auth/service/auth.service';
 import { Like, Repository } from 'typeorm';
 import { UserEntity } from '../models/user.entity';
@@ -125,11 +125,14 @@ export class UserService {
     );
   }
 
-  updateOne(id: number, user: User): Observable<any> {
+  updateOne(id: number, user: User): Observable<User> {
     delete user.email;
     delete user.password;
     delete user.role;
-    return from(this.userRepository.update(id, user));
+    console.log(user);
+    return from(this.userRepository.update(id, user)).pipe(
+      switchMapTo(this.findOne(id)),
+    );
   }
 
   deleteOne(id: number): Observable<any> {

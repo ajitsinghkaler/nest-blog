@@ -7,8 +7,13 @@ import {
   Post,
   Put,
   Query,
+  Request,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -17,7 +22,23 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { User, UserRole } from '../models/user.interface';
 import { UserService } from '../service/user.service';
+import { diskStorage } from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import path = require('path');
+import { join } from 'path';
 
+export const imgStorage = {
+  storage: diskStorage({
+    destination: './uploads/profileimages',
+    filename: (req, file, cb) => {
+      const filename: string =
+        path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+      const extension: string = path.parse(file.originalname).ext;
+
+      cb(null, `${filename}${extension}`);
+    },
+  }),
+};
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -85,5 +106,24 @@ export class UserController {
   updateRole(@Param('id') id: string, @Body() user: User): Observable<User> {
     user = { role: user.role };
     return this.userService.updateRole(Number(id), user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file', imgStorage))
+  uploadFile(
+    @UploadedFile() file,
+    @Request() req,
+  ): Observable<{ profileImage: string }> {
+    return this.userService
+      .updateOne(req.user.id, { profileImage: file.filename })
+      .pipe(map((user: User) => ({ profileImage: user.profileImage })));
+  }
+
+  @Get('profile-image/:imagename')
+  findProfileImage(@Param('imagename') imagename, @Res() res): Observable<any> {
+    return of(
+      res.sendFile(join(process.cwd(), 'uploads/profileimages/' + imagename)),
+    );
   }
 }
