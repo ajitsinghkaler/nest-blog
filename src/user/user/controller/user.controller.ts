@@ -49,13 +49,24 @@ export class UserController {
   index(
     @Query('page') page = 1,
     @Query('limit') limit = 10,
+    @Query('username') username: string,
   ): Observable<Pagination<User>> {
-    console.log('user Controller');
-    return this.userService.paginate({
-      page: Number(page),
-      limit: Number(limit),
-      route: 'http://localhost:3000/users',
-    });
+    if (username === null || username === undefined) {
+      return this.userService.paginate({
+        page: Number(page),
+        limit: Number(limit),
+        route: 'http://localhost:3000/users',
+      });
+    } else {
+      return this.userService.paginateByUsername(
+        {
+          page: Number(page),
+          limit: Number(limit),
+          route: 'http://localhost:3000/users',
+        },
+        { username },
+      );
+    }
   }
 
   @Put(':id')
