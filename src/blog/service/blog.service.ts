@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { from, Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, switchMapTo } from 'rxjs/operators';
 import { User } from 'src/user/user/models/user.interface';
 import { Repository } from 'typeorm';
 import { BlogEntryEntity } from '../model/blog-entry.entity';
@@ -42,7 +42,7 @@ export class BlogService {
     );
   }
 
-  findOne(id) {
+  findOne(id: number) {
     return from(
       this.blogRepository.findOne(
         {
@@ -51,5 +51,15 @@ export class BlogService {
         { relations: ['author'] },
       ),
     );
+  }
+
+  updateOne(id: number, blogEntry: BlogEntry): Observable<BlogEntry> {
+    return from(this.blogRepository.update(id, blogEntry)).pipe(
+      switchMapTo(this.findOne(id)),
+    );
+  }
+
+  deleteOne(id: number): Observable<any> {
+    return from(this.blogRepository.delete(id));
   }
 }
