@@ -17,6 +17,7 @@ import { UserIsAuthorGaurd } from '../gaurds/user-is-author.gaurds';
 import { BlogEntry } from '../model/blog-entry.interface';
 import { BlogService } from '../service/blog.service';
 
+export const BLOG_ENTRIES_URL = 'localhost:3000/api/v1/blogs/';
 @Controller('blogs')
 export class BlogController {
   constructor(private blogService: BlogService) {}
@@ -28,13 +29,33 @@ export class BlogController {
     return this.blogService.create(user, blogEntry);
   }
 
-  @Get()
-  findBlogEntries(@Query('userId') userId: number): Observable<BlogEntry[]> {
-    if (userId === null || userId === undefined) {
-      return this.blogService.findAll();
-    } else {
-      return this.blogService.findByUser(userId);
-    }
+  @Get(``)
+  paginateAll(@Query('page') page = 1, @Query('limit') limit = 10) {
+    console.log(limit, page);
+    limit = limit > 100 ? 100 : limit;
+    return this.blogService.paginateAll({
+      limit: Number(limit),
+      page: Number(page),
+      route: BLOG_ENTRIES_URL,
+    });
+  }
+
+  @Get('user/:userId')
+  paginateByUser(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Param('userId') userId: number,
+  ) {
+    console.log(limit, page);
+    limit = limit > 100 ? 100 : limit;
+    return this.blogService.paginateByUser(
+      {
+        limit: Number(limit),
+        page: Number(page),
+        route: BLOG_ENTRIES_URL,
+      },
+      Number(userId),
+    );
   }
 
   @Get(':id')
