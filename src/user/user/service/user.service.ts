@@ -64,7 +64,7 @@ export class UserService {
   }
 
   paginate(options: IPaginationOptions): Observable<Pagination<User>> {
-    return from(paginate<User>(this.userRepository, options)).pipe(
+    return from(paginate(this.userRepository, options)).pipe(
       map((usersPageAble: Pagination<User>) => {
         usersPageAble.items.forEach(function (v) {
           delete v.password;
