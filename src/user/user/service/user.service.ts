@@ -127,9 +127,7 @@ export class UserService {
 
   updateOne(id: number, user: User): Observable<User> {
     delete user.email;
-    delete user.password;
     delete user.role;
-    console.log(user);
     return from(this.userRepository.update(id, user)).pipe(
       switchMapTo(this.findOne(id)),
     );

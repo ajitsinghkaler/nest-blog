@@ -20,12 +20,10 @@ export class UserIsUserGaurd implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     const params = request.params;
-    console.log(params);
     const user: User = request.user;
     return this.userService.findOne(user.id).pipe(
       map((user: User) => {
         let hasPermission = false;
-        console.log(user.id);
         if (user.id === Number(params.id)) {
           hasPermission = true;
         }
