@@ -30,7 +30,7 @@ import { UserIsUserGaurd } from 'src/auth/guards/UserIsUser.gaurd';
 
 export const imgStorage = {
   storage: diskStorage({
-    destination: './uploads/profileimages',
+    destination: './uploads/blog-entry-images',
     filename: (req, file, cb) => {
       const filename: string =
         path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
