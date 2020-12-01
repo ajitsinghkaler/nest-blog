@@ -30,7 +30,7 @@ import { UserIsUserGaurd } from 'src/auth/guards/UserIsUser.gaurd';
 
 export const imgStorage = {
   storage: diskStorage({
-    destination: './uploads/blog-entry-images',
+    destination: './uploads/profileimages',
     filename: (req, file, cb) => {
       const filename: string =
         path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
@@ -77,14 +77,14 @@ export class UserController {
       return this.userService.paginate({
         page: Number(page),
         limit: Number(limit),
-        route: 'http://localhost:3000/users',
+        route: 'http://localhost:3000/users/api/v1',
       });
     } else {
       return this.userService.paginateByUsername(
         {
           page: Number(page),
           limit: Number(limit),
-          route: 'http://localhost:3000/users',
+          route: 'http://localhost:3000/users/api/v1',
         },
         { username },
       );
@@ -119,6 +119,7 @@ export class UserController {
     @UploadedFile() file,
     @Request() req,
   ): Observable<{ profileImage: string }> {
+    console.log(req.user);
     return this.userService
       .updateOne(req.user.id, { profileImage: file.filename })
       .pipe(map((user: User) => ({ profileImage: user.profileImage })));
